@@ -30,8 +30,12 @@ function table(rows: string[][]): HTMLElement {
     return table
 }
 
+function img_url(id: string, size: string): string {
+    return `img/${size}/${id}.webp`;
+}
+
 function add_item(config: ColConfig, id: string, size: string, ar: number, info?: ItemInfo) {
-    const src = `img/${size}/${id}.webp`
+    const src = img_url(id, size);
     const item = document.createElement("div");
     item.classList.add("item");
 
@@ -74,8 +78,34 @@ function add_item(config: ColConfig, id: string, size: string, ar: number, info?
     config.column_height[min_idx] += img.height + config.margin;
 
     item.addEventListener("click", e => {
-        window.location.hash = id;
+        show_fullscreen(id);
     })
+}
+
+function show_fullscreen(id: string) {
+    const img = new Image();
+    img.src = img_url(id, String(sizes[sizes.length-1]));
+    const div = document.createElement("div");
+    history.pushState(id, null, "#"+id);
+
+    const kd_listener = function(e: KeyboardEvent) {
+        if (e.key == "Escape") {
+            close();
+        }
+    };
+
+    function close() {
+        window.removeEventListener("keydown", kd_listener);
+        div.remove();
+        history.back();
+    }
+
+    img.onload = function() {
+        div.classList.add("fullscreen");
+        div.appendChild(img);
+        window.addEventListener("keydown", kd_listener);
+        document.body.appendChild(div);
+    }
 }
 
 function select_columns(): ColConfig {

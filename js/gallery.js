@@ -14,8 +14,11 @@ function table(rows) {
     }
     return table;
 }
+function img_url(id, size) {
+    return `img/${size}/${id}.webp`;
+}
 function add_item(config, id, size, ar, info) {
-    const src = `img/${size}/${id}.webp`;
+    const src = img_url(id, size);
     const item = document.createElement("div");
     item.classList.add("item");
     const img = new Image();
@@ -50,8 +53,30 @@ function add_item(config, id, size, ar, info) {
     config.columns[min_idx].appendChild(item);
     config.column_height[min_idx] += img.height + config.margin;
     item.addEventListener("click", e => {
-        window.location.hash = id;
+        show_fullscreen(id);
     });
+}
+function show_fullscreen(id) {
+    const img = new Image();
+    img.src = img_url(id, String(sizes[sizes.length - 1]));
+    const div = document.createElement("div");
+    history.pushState(id, null, "#" + id);
+    const kd_listener = function (e) {
+        if (e.key == "Escape") {
+            close();
+        }
+    };
+    function close() {
+        window.removeEventListener("keydown", kd_listener);
+        div.remove();
+        history.back();
+    }
+    img.onload = function () {
+        div.classList.add("fullscreen");
+        div.appendChild(img);
+        window.addEventListener("keydown", kd_listener);
+        document.body.appendChild(div);
+    };
 }
 function select_columns() {
     const n_columns = Math.min(Math.floor(window.innerWidth / 400), 4);

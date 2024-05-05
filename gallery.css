@@ -40,3 +40,18 @@ div.info {
 div.item:hover > div.info {
   opacity: 1;
 }
+div.fullscreen {
+  position: fixed;
+  inset: 0;
+  height: 100vh;
+  width: 100vw;
+  margin: auto;
+  background-color: black;
+  justify-content: center;
+}
+div.fullscreen img {
+  margin: 5vh;
+  object-fit: contain;
+  width: 90vw;
+  height: 90vh;
+}
