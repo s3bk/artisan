@@ -21,8 +21,10 @@ type ViewConfig = {
 const VIEW: ViewConfig = { tag_filter: [] };
 
 window.addEventListener("popstate", (event) => {
-    VIEW.tag_filter = event.state.tag_filter;
-    update();
+    if (event.state.tag_filter !== undefined) {
+        VIEW.tag_filter = event.state.tag_filter;
+        update();
+    }
 });
 
 function push_state() {
@@ -31,6 +33,21 @@ function push_state() {
         s += "?tag="+VIEW.tag_filter.join(",");
     }
     history.pushState(VIEW, null, s);
+}
+function restore_state(focus: (id: string) => void) {
+    if (location.search.startsWith("?")) {
+        const [_, qargs] = location.search.split("?");
+        for (const q of qargs.split("&")) {
+            const [key, val] = q.split("=");
+            if (key == "tag") {
+                VIEW.tag_filter = val.split(",");
+            }
+        }
+    }
+    if (location.hash.length > 0) {
+        const id = location.hash.split("#")[1];
+        focus(id);
+    }
 }
 
 function add_tag_filter(tag: string) {
@@ -169,7 +186,10 @@ function show_fullscreen(id: string, info: ItemInfo) {
         div.classList.add("fullscreen");
         div.appendChild(img);
         if (info.tags !== undefined) {
-            div.appendChild(tag_list(info.tags, "🔍", add_tag_filter));
+            div.appendChild(tag_list(info.tags, "🔍", tag => {
+                close();
+                add_tag_filter(tag);
+            }));
         }
         window.addEventListener("keydown", kd_listener);
         window.addEventListener("click", close);
@@ -211,7 +231,21 @@ function select_size(config: ColConfig): string {
 async function init() {
     const tag_search = document.createElement("div");
     tag_search.classList.add("tag-search");
-    document.body.appendChild(tag_search);
+    document.querySelector("header").appendChild(tag_search);
+
+    const header = document.querySelector("header");
+    let search_detached = false;
+    window.addEventListener("scroll", e => {
+        const d = header.getBoundingClientRect().bottom <= tag_search.getBoundingClientRect().height;
+        if (d != search_detached) {
+            if (d) {
+                tag_search.classList.add("floating");
+            } else {
+                tag_search.classList.remove("floating");
+            }
+            search_detached = d;
+        }
+    })
 
     const container = document.createElement("div");
     container.classList.add("flow");
@@ -223,7 +257,8 @@ async function init() {
 
     const item_list: [[string, number]] = await IMG_LIST;
     const item_info: Map<string, ItemInfo> = new Map(Object.entries(await ITEM_INFO));
-
+    
+    restore_state(id => show_fullscreen(id, item_info.get(id) ?? {}));
 
     update = function() {
         for (const col of config.columns) {

@@ -1,6 +1,7 @@
 :root {
   --margin: 1vw;
   --radius: 10px;
+  --head-color: rgb(220,220,220);
 }
 
 body {
@@ -10,13 +11,15 @@ body {
 }
 body > header {
   text-align: center;
-  background-color: rgb(220,220,220);
+  background-color: var(--head-color);
   padding-top: 1em;
   padding-bottom: 0.5em;
+  position: relative;
+}
+body > header > h1, h2 {
   font-family: "Charm", cursive;
   font-weight: 400;
   font-style: normal;
-  
 }
 .tag-search > div.tags{
   display: flex;
@@ -101,4 +104,17 @@ div.tags > div {
   border-radius: 0.5em;
   margin: 0.2em;
   padding: 0.2em 0.5em;
+}
+div.tag-search {
+  position: absolute;
+  bottom: 0;
+}
+div.tag-search.floating {
+  position: fixed;
+  top: 0;
+  background-color: var(--head-color);
+  left: 0;
+  right: 0;
+  z-index: 1;
+  bottom: unset;
 }
