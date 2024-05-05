@@ -1,6 +1,23 @@
 const sizes = [400, 600, 1000];
-const IMG_INFO = fetch("images.json").then(r => r.text());
-function add_image(config, src, ar) {
+const IMG_LIST = fetch("images.json").then(r => r.text()).then(t => JSON.parse(t));
+const ITEM_INFO = fetch("info.json").then(r => r.text()).then(t => JSON.parse(t));
+function table(rows) {
+    const table = document.createElement("table");
+    for (const row of rows) {
+        const tr = document.createElement("tr");
+        for (const val of row) {
+            const td = document.createElement("td");
+            td.innerText = val;
+            tr.appendChild(td);
+        }
+        table.appendChild(tr);
+    }
+    return table;
+}
+function add_item(config, id, size, ar, info) {
+    const src = `img/${size}/${id}.webp`;
+    const item = document.createElement("div");
+    item.classList.add("item");
     const img = new Image();
     img.loading = "lazy";
     img.src = src;
@@ -15,7 +32,22 @@ function add_image(config, src, ar) {
             min_idx = i;
         }
     }
-    config.columns[min_idx].appendChild(img);
+    item.appendChild(img);
+    const info_div = document.createElement("div");
+    info_div.classList.add("info");
+    let info_list = [["ID", id]];
+    if (info !== undefined) {
+        function add(val, f) {
+            if (val !== undefined) {
+                info_list.push(f(val));
+            }
+        }
+        add(info.price_EUR, eur => ["Price", `${eur} €`]);
+        add(info.size_cm, size => ["Size", size.map(cm => `${cm}cm`).join(" by ")]);
+    }
+    info_div.appendChild(table(info_list));
+    item.appendChild(info_div);
+    config.columns[min_idx].appendChild(item);
     config.column_height[min_idx] += img.height + config.margin;
 }
 function select_columns() {
@@ -46,7 +78,7 @@ function select_size(config) {
             size = s;
         }
     }
-    return size;
+    return String(size);
 }
 async function init() {
     const container = document.createElement("div");
@@ -55,19 +87,11 @@ async function init() {
     const config = select_columns();
     const size = select_size(config);
     container.append(...config.columns);
-    let img_info_text = await IMG_INFO;
-    const images = JSON.parse(img_info_text);
-    let i = 0;
-    function next() {
-        if (i < images.length) {
-            const [id, ar] = images[i];
-            const id_str = String(id).padStart(5, "0");
-            add_image(config, `img/${size}/${id_str}.webp`, ar);
-            setTimeout(next, 500);
-            i += 1;
-        }
+    const item_list = await IMG_LIST;
+    const item_info = new Map(Object.entries(await ITEM_INFO));
+    for (const [id, ar] of item_list) {
+        add_item(config, id, size, ar, item_info.get(id));
     }
-    setTimeout(next, 100);
 }
 if (document.readyState === 'complete') {
     init();

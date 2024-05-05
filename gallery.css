@@ -19,6 +19,21 @@ div.flow > div {
   flex-direction: column;
   margin: 0 1vw;
 }
-div.flow > div > img {
+div.flow > div > div.item {
+  position: relative;
   margin: 1vw 0;
+}
+div.info {
+  margin: 0.5em;
+  padding: 0.5em;
+  border-radius: 0.5em;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background-color: rgba(255,255,255,0.7);
+  opacity: 0.2;
+  transition: opacity 1s;
+}
+div.item:hover > div.info {
+  opacity: 1;
 }
