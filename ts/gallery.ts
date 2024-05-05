@@ -13,6 +13,7 @@ type ColConfig = {
 
 function add_image(config: ColConfig, src: string, ar: number) {
     const img = new Image();
+    img.loading = "lazy";
     img.src = src;
     const img_width = config.col_width - config.margin;
     const img_height = img_width * ar;
