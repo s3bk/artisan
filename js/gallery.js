@@ -1,5 +1,5 @@
 const sizes = [400, 600, 1000];
-const IMG_INFO = fetch("/images.json").then(r => r.text());
+const IMG_INFO = fetch("images.json").then(r => r.text());
 function add_image(config, src, ar) {
     const img = new Image();
     img.loading = "lazy";
@@ -62,7 +62,7 @@ async function init() {
         if (i < images.length) {
             const [id, ar] = images[i];
             const id_str = String(id).padStart(5, "0");
-            add_image(config, `/img/${size}/${id_str}.webp`, ar);
+            add_image(config, `img/${size}/${id_str}.webp`, ar);
             setTimeout(next, 500);
             i += 1;
         }
