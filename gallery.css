@@ -1,3 +1,8 @@
+:root {
+  --margin: 1vw;
+  --radius: 10px;
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -9,6 +14,10 @@ body > header {
   padding-top: 1em;
   padding-bottom: 0.5em;
 }
+.tag-search > div.tags{
+  display: flex;
+  flex-direction: row;
+}
 div.flow {
   display: flex;
   flex-direction: row;
@@ -17,14 +26,14 @@ div.flow {
 div.flow > div {
   display: flex;
   flex-direction: column;
-  margin: 0 1vw;
+  margin: 0 var(--margin);
 }
 div.flow > div > div.item {
   position: relative;
-  margin: 1vw 0;
+  margin: var(--margin) 0;
 }
 div.item > img {
-    border-radius: 1vw;
+    border-radius: var(--radius);
 }
 div.info {
   margin: 0.5em;
@@ -40,6 +49,9 @@ div.info {
 div.item:hover > div.info {
   opacity: 1;
 }
+div.item:hover > div.tags {
+  opacity: 1;
+}
 div.fullscreen {
   position: fixed;
   inset: 0;
@@ -48,10 +60,27 @@ div.fullscreen {
   margin: auto;
   background-color: black;
   justify-content: center;
+  display: flex;
+  flex-direction: row;
 }
 div.fullscreen img {
-  margin: 5vh;
+  margin: 0;
   object-fit: contain;
-  width: 90vw;
-  height: 90vh;
+}
+div.item > div.tags {
+  position: absolute; 
+  top: var(--radius);
+  left: var(--radius);
+  opacity: 0;
+  transition: opacity 1s;
+}
+div.fullscreen > div.tags {
+  opacity: 1;
+}
+div.tags > div {
+  background-color: white;
+  border: 1px solid silver;
+  border-radius: 0.5em;
+  margin: 0.2em;
+  padding: 0.2em 0.5em;
 }

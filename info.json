@@ -1,5 +1,5 @@
 {
-    "09989": { "price_EUR": 300, "size_cm": [150, 210], "tags": ["gray", "wool", "carpet"] },
-    "09994": { "size_cm": [150, 100], "tags": ["yellow", "wool", "carpet"]},
-    "09995": { "tags": ["red", "wool", "carpet"] }
+    "09989": { "price_EUR": 300, "size_cm": [150, 210], "tags": ["color:gray", "material:wool", "carpet"] },
+    "09994": { "size_cm": [150, 100], "tags": ["color:yellow", "material:wool", "carpet"]},
+    "09995": { "tags": ["color:red", "material:wool", "carpet"] }
 }

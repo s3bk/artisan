@@ -1,6 +1,34 @@
 const sizes = [400, 600, 1000];
 const IMG_LIST = fetch("images.json").then(r => r.text()).then(t => JSON.parse(t));
 const ITEM_INFO = fetch("info.json").then(r => r.text()).then(t => JSON.parse(t));
+const VIEW = { tag_filter: [] };
+window.addEventListener("popstate", (event) => {
+    VIEW.tag_filter = event.state.tag_filter;
+    update();
+});
+function push_state() {
+    let s = "";
+    if (VIEW.tag_filter.length > 0) {
+        s += "?tag=" + VIEW.tag_filter.join(",");
+    }
+    history.pushState(VIEW, null, s);
+}
+function add_tag_filter(tag) {
+    if (!VIEW.tag_filter.find(t => t == tag)) {
+        VIEW.tag_filter.push(tag);
+        push_state();
+        update();
+    }
+}
+function remove_tag_filter(tag) {
+    const idx = VIEW.tag_filter.findIndex(t => t == tag);
+    if (idx >= 0) {
+        VIEW.tag_filter.splice(idx, 1);
+        push_state();
+        update();
+    }
+}
+let update;
 function table(rows) {
     const table = document.createElement("table");
     for (const row of rows) {
@@ -29,9 +57,9 @@ function add_item(config, id, size, ar, info) {
     img.style.height = img_height + "vw";
     img.style.width = img_width + "vw";
     let min_idx = 0;
-    let min_height = config.column_height[0];
-    for (const [i, h] of config.column_height.entries()) {
-        if (h < min_height) {
+    let min_height = config.columns[0].height;
+    for (const [i, col] of config.columns.entries()) {
+        if (col.height < min_height) {
             min_idx = i;
         }
     }
@@ -39,24 +67,40 @@ function add_item(config, id, size, ar, info) {
     const info_div = document.createElement("div");
     info_div.classList.add("info");
     let info_list = [["ID", id]];
-    if (info !== undefined) {
-        function add(val, f) {
-            if (val !== undefined) {
-                info_list.push(f(val));
-            }
+    function add(val, f) {
+        if (val !== undefined) {
+            info_list.push(f(val));
         }
-        add(info.price_EUR, eur => ["Price", `${eur} €`]);
-        add(info.size_cm, size => ["Size", size.map(cm => `${cm}cm`).join(" by ")]);
     }
+    add(info.price_EUR, eur => ["Price", `${eur} €`]);
+    add(info.size_cm, size => ["Size", size.map(cm => `${cm}cm`).join(" by ")]);
     info_div.appendChild(table(info_list));
     item.appendChild(info_div);
-    config.columns[min_idx].appendChild(item);
-    config.column_height[min_idx] += img.height + config.margin;
+    if (info?.tags !== undefined) {
+        item.appendChild(tag_list(info.tags, add_tag_filter));
+    }
+    const col = config.columns[min_idx];
+    col.elem.appendChild(item);
+    col.height += img.height + config.margin;
     item.addEventListener("click", e => {
-        show_fullscreen(id);
+        show_fullscreen(id, info);
     });
 }
-function show_fullscreen(id) {
+function tag_list(tags, callback) {
+    const tag_list = document.createElement("div");
+    tag_list.classList.add("tags");
+    for (const tag of tags) {
+        const e = document.createElement("div");
+        e.innerText = tag;
+        tag_list.appendChild(e);
+        e.addEventListener("click", e => {
+            callback(tag);
+            e.stopPropagation();
+        });
+    }
+    return tag_list;
+}
+function show_fullscreen(id, info) {
     const img = new Image();
     img.src = img_url(id, String(sizes[sizes.length - 1]));
     const div = document.createElement("div");
@@ -68,13 +112,18 @@ function show_fullscreen(id) {
     };
     function close() {
         window.removeEventListener("keydown", kd_listener);
+        window.removeEventListener("click", close);
         div.remove();
         history.back();
     }
     img.onload = function () {
         div.classList.add("fullscreen");
         div.appendChild(img);
+        if (info.tags !== undefined) {
+            div.appendChild(tag_list(info.tags, add_tag_filter));
+        }
         window.addEventListener("keydown", kd_listener);
+        window.addEventListener("click", close);
         document.body.appendChild(div);
     };
 }
@@ -83,18 +132,15 @@ function select_columns() {
     const columns = [];
     const col_width = 100 / n_columns;
     const margin = 2.;
-    const column_height = [];
     for (var i = 0; i < n_columns; i++) {
-        column_height.push(0.0);
         const e = document.createElement("div");
         e.style.width = col_width + "vw";
-        columns.push(e);
+        columns.push({ elem: e, height: 0.0 });
     }
     return {
         n_columns,
         columns,
         col_width,
-        column_height,
         margin
     };
 }
@@ -109,17 +155,39 @@ function select_size(config) {
     return String(size);
 }
 async function init() {
+    const tag_search = document.createElement("div");
+    tag_search.classList.add("tag-search");
+    document.body.appendChild(tag_search);
     const container = document.createElement("div");
     container.classList.add("flow");
     document.body.appendChild(container);
     const config = select_columns();
     const size = select_size(config);
-    container.append(...config.columns);
+    container.append(...config.columns.map(c => c.elem));
     const item_list = await IMG_LIST;
     const item_info = new Map(Object.entries(await ITEM_INFO));
-    for (const [id, ar] of item_list) {
-        add_item(config, id, size, ar, item_info.get(id));
-    }
+    update = function () {
+        for (const col of config.columns) {
+            col.elem.replaceChildren(...[]);
+            col.height = 0.0;
+        }
+        tag_search.replaceChildren(tag_list(VIEW.tag_filter, remove_tag_filter));
+        for (const [id, ar] of item_list) {
+            const info = item_info.get(id) ?? {};
+            let show = true;
+            for (const tag of VIEW.tag_filter) {
+                if ((info.tags === undefined) || (!info.tags.find(t => t == tag))) {
+                    show = false;
+                    break;
+                }
+            }
+            if (show) {
+                add_item(config, id, size, ar, info);
+            }
+        }
+    };
+    push_state();
+    update();
 }
 if (document.readyState === 'complete') {
     init();
