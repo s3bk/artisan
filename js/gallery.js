@@ -49,6 +49,9 @@ function add_item(config, id, size, ar, info) {
     item.appendChild(info_div);
     config.columns[min_idx].appendChild(item);
     config.column_height[min_idx] += img.height + config.margin;
+    item.addEventListener("click", e => {
+        window.location.hash = id;
+    });
 }
 function select_columns() {
     const n_columns = Math.min(Math.floor(window.innerWidth / 400), 4);

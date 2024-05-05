@@ -72,6 +72,10 @@ function add_item(config: ColConfig, id: string, size: string, ar: number, info?
 
     config.columns[min_idx].appendChild(item);
     config.column_height[min_idx] += img.height + config.margin;
+
+    item.addEventListener("click", e => {
+        window.location.hash = id;
+    })
 }
 
 function select_columns(): ColConfig {

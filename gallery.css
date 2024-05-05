@@ -23,6 +23,9 @@ div.flow > div > div.item {
   position: relative;
   margin: 1vw 0;
 }
+div.item > img {
+    border-radius: 1vw;
+}
 div.info {
   margin: 0.5em;
   padding: 0.5em;
