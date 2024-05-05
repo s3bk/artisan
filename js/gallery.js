@@ -1,7 +1,7 @@
 const sizes = [400, 600, 1000];
 const IMG_LIST = fetch("images.json").then(r => r.text()).then(t => JSON.parse(t));
 const ITEM_INFO = fetch("info.json").then(r => r.text()).then(t => JSON.parse(t));
-const VIEW = { tag_filter: [] };
+const VIEW = { tag_filter: [], id: null };
 window.addEventListener("popstate", (event) => {
     if (event.state.tag_filter !== undefined) {
         VIEW.tag_filter = event.state.tag_filter;
@@ -9,25 +9,27 @@ window.addEventListener("popstate", (event) => {
     }
 });
 function push_state() {
-    let s = "";
+    const parts = [];
     if (VIEW.tag_filter.length > 0) {
-        s += "?tag=" + VIEW.tag_filter.join(",");
+        parts.push("tag=" + VIEW.tag_filter.join("+"));
     }
-    history.pushState(VIEW, null, s);
+    if (VIEW.id !== null) {
+        parts.push("id=" + VIEW.id);
+    }
+    history.pushState(VIEW, null, "#" + parts.join(","));
 }
 function restore_state(focus) {
-    if (location.search.startsWith("?")) {
-        const [_, qargs] = location.search.split("?");
-        for (const q of qargs.split("&")) {
-            const [key, val] = q.split("=");
+    if (location.hash.startsWith("#")) {
+        const [_, parts_s] = location.hash.split("#");
+        for (const part of parts_s.split(",")) {
+            const [key, val] = part.split("=");
             if (key == "tag") {
-                VIEW.tag_filter = val.split(",");
+                VIEW.tag_filter = val.split("+");
+            }
+            else if (key == "id") {
+                focus(val);
             }
         }
-    }
-    if (location.hash.length > 0) {
-        const id = location.hash.split("#")[1];
-        focus(id);
     }
 }
 function add_tag_filter(tag) {
@@ -68,7 +70,7 @@ function add_item(config, id, size, ar, info) {
     const img = new Image();
     img.loading = "lazy";
     img.src = src;
-    const img_width = config.col_width - config.margin;
+    const img_width = config.col_width;
     const img_height = img_width * ar;
     img.style.height = img_height + "vw";
     img.style.width = img_width + "vw";
@@ -122,7 +124,8 @@ function show_fullscreen(id, info) {
     const img = new Image();
     img.src = img_url(id, String(sizes[sizes.length - 1]));
     const div = document.createElement("div");
-    history.pushState(id, null, "#" + id);
+    VIEW.id = id;
+    push_state();
     const kd_listener = function (e) {
         if (e.key == "Escape") {
             close();
@@ -151,8 +154,8 @@ function show_fullscreen(id, info) {
 function select_columns() {
     const n_columns = Math.min(Math.floor(window.innerWidth / 400), 4);
     const columns = [];
-    const col_width = 100 / n_columns;
     const margin = 2.;
+    const col_width = (100 - margin * (n_columns + 1)) / n_columns;
     for (var i = 0; i < n_columns; i++) {
         const e = document.createElement("div");
         e.style.width = col_width + "vw";
@@ -167,7 +170,7 @@ function select_columns() {
 }
 function select_size(config) {
     let size = sizes[0];
-    const img_width = window.innerWidth * window.devicePixelRatio * (config.col_width - config.margin) / 100.;
+    const img_width = window.innerWidth * window.devicePixelRatio * config.col_width / 100.;
     for (const s of sizes) {
         if (s < img_width) {
             size = s;
