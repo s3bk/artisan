@@ -13,6 +13,10 @@ body > header {
   background-color: rgb(220,220,220);
   padding-top: 1em;
   padding-bottom: 0.5em;
+  font-family: "Charm", cursive;
+  font-weight: 400;
+  font-style: normal;
+  
 }
 .tag-search > div.tags{
   display: flex;
@@ -73,6 +77,20 @@ div.item > div.tags {
   left: var(--radius);
   opacity: 0;
   transition: opacity 1s;
+  cursor: pointer;
+}
+div.item > div.tags > div {
+  display: inline-flex;
+}
+div.item > div.tags > div > span.name {
+  margin-left: auto;
+  flex-grow: 1;
+}
+div.tags > div > span.action {
+  margin-left: 0.5em;
+}
+div.tags > div:hover {
+  background-color: gold;
 }
 div.fullscreen > div.tags {
   opacity: 1;

@@ -77,8 +77,7 @@ function img_url(id: string, size: string): string {
 
 function add_item(config: ColConfig, id: string, size: string, ar: number, info: ItemInfo) {
     const src = img_url(id, size);
-    const item = document.createElement("div");
-    item.classList.add("item");
+    const item = elem("div", {class: "item"});
 
     const img = new Image();
     img.loading = "lazy";
@@ -89,18 +88,18 @@ function add_item(config: ColConfig, id: string, size: string, ar: number, info:
     img.style.width = img_width + "vw";
 
     // find smallest column
-    let min_idx = 0;
-    let min_height = config.columns[0].height;
+    let min_idx = -1;
+    let min_height = Infinity;
     for (const [i, col] of config.columns.entries()) {
         if (col.height < min_height) {
             min_idx = i;
+            min_height = col.height;
         }
     }
-
+    
     item.appendChild(img);
 
-    const info_div = document.createElement("div");
-    info_div.classList.add("info");
+    const info_div = elem("div", {class: "info"});
     
     let info_list = [["ID", id]];
     function add<T>(val: T | undefined, f: (t: T) => [string, string]) {
@@ -110,32 +109,38 @@ function add_item(config: ColConfig, id: string, size: string, ar: number, info:
     }
     add(info.price_EUR, eur => ["Price", `${eur} €`]);
     add(info.size_cm, size => ["Size", size.map(cm => `${cm}cm`).join(" by ")]);
+
     info_div.appendChild(table(info_list));
     item.appendChild(info_div);
     
     if (info?.tags !== undefined) {
-        item.appendChild(tag_list(info.tags, add_tag_filter));
+        item.appendChild(tag_list(info.tags, "🔍", add_tag_filter));
     }
 
     const col = config.columns[min_idx];
     col.elem.appendChild(item);
-    col.height += img.height + config.margin;
+    col.height += img_height + config.margin;
 
     item.addEventListener("click", e => {
-        show_fullscreen(id, info);
+        if (e.target == img) {
+            show_fullscreen(id, info);
+        }
     })
 }
 
-function tag_list(tags: string[], callback: (tag: string) => void) {
+function tag_list(tags: string[], icon: string, callback: (tag: string) => void) {
     const tag_list = document.createElement("div");
     tag_list.classList.add("tags");
     for (const tag of tags) {
-        const e = document.createElement("div");
-        e.innerText = tag;
+        const parts = tag.split(":");
+        const e = elem("div", null,
+            elem("span", { class: "name" }, parts[parts.length-1]),
+            elem("span", { class: "action" }, icon)
+        );
         tag_list.appendChild(e);
         e.addEventListener("click", e => {
+            e.stopImmediatePropagation();   
             callback(tag);
-            e.stopPropagation();   
         });
     }
     return tag_list;
@@ -164,7 +169,7 @@ function show_fullscreen(id: string, info: ItemInfo) {
         div.classList.add("fullscreen");
         div.appendChild(img);
         if (info.tags !== undefined) {
-            div.appendChild(tag_list(info.tags, add_tag_filter));
+            div.appendChild(tag_list(info.tags, "🔍", add_tag_filter));
         }
         window.addEventListener("keydown", kd_listener);
         window.addEventListener("click", close);
@@ -226,7 +231,7 @@ async function init() {
             col.height = 0.0;
         }
 
-        tag_search.replaceChildren(tag_list(VIEW.tag_filter, remove_tag_filter));
+        tag_search.replaceChildren(tag_list(VIEW.tag_filter, "−", remove_tag_filter));
 
         for (const [id, ar] of item_list) {
             const info = item_info.get(id) ?? {};
@@ -253,4 +258,24 @@ if (document.readyState === 'complete') {
     init();
 } else {
     document.addEventListener("DOMContentLoaded", init);
+}
+
+type ElemAttrs = {
+    [key: string]: string
+};
+export function elem(tag: string, attrs?: ElemAttrs | null, ...children: (ChildNode | string)[]): HTMLElement {
+    const e = document.createElement(tag);
+    if (attrs) {
+        for (const [key, value] of Object.entries(attrs)) {
+            e.setAttribute(key, value);
+        }
+    }
+    for (const c of children) {
+        if (typeof(c) == "string") {
+            e.appendChild(document.createTextNode(c));
+        } else {
+            e.appendChild(c);
+        }
+    }
+    return e;
 }
