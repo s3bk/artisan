@@ -27,11 +27,15 @@ fn main() {
             let aspect_ratio = img.height() as f64 / img.width() as f64;
 
             for &size in sizes {
+                let path = out_folder.join(format!("{size}/{id}.webp"));
+                if path.exists() {
+                    continue;
+                }
+
                 let scaled_width = size;
                 let scaled_height = (size as f64 * aspect_ratio).round() as u32;
                 let scaled = img.resize_exact(scaled_width, scaled_height, FilterType::CatmullRom);
                 let encoded = webp::Encoder::from_image(&scaled).unwrap().encode_simple(false, 80.).unwrap();
-                let path = out_folder.join(format!("{size}/{id}.webp"));
                 std::fs::write(&path, &*encoded).unwrap();
             }
 

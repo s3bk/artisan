@@ -1,25 +1,30 @@
 :root {
   --margin: 2vw;
   --radius: 10px;
-  --head-color: rgb(220,220,220);
+  --head-color: rgb(208, 246, 255);
 }
 
 body {
   margin: 0;
   padding: 0;
-  background-color: rgb(200,200,190);
+  background-color: rgb(221, 221, 213);
 }
 body > header {
   text-align: center;
   background-color: var(--head-color);
   padding-top: 1em;
-  padding-bottom: 0.5em;
+  padding-bottom: 2em;
   position: relative;
 }
 body > header > h1, h2 {
   font-family: "Charm", cursive;
   font-weight: 400;
   font-style: normal;
+  padding: 0;
+  margin: 0;
+}
+header > h1 {
+  font-size: 30pt;
 }
 .tag-search > div.tags{
   display: flex;
@@ -53,7 +58,7 @@ div.info {
   bottom: 0;
   right: 0;
   background-color: beige;
-  opacity: 0.2;
+  opacity: 0;
   transition: opacity 1s;
 }
 div.item:hover > div.info {
@@ -95,8 +100,11 @@ div.item > div.tags > div > span.name {
 div.tags > div > span.action {
   margin-left: 0.5em;
 }
-div.tags > div:hover {
-  background-color: gold;
+div.item div.tags > div:hover {
+  background-color: rgb(160,250,150);
+}
+div.tag-search div.tags > div:hover {
+  background-color: rgb(250,160,150);
 }
 div.fullscreen > div.tags {
   opacity: 1;

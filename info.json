@@ -6,5 +6,22 @@
     "09999": { "tags": ["material:sabra", "color:white", "carpet" ]},
     "00004": { "tags": ["material:sabra", "color:pink", "carpet" ]},
     "00009": { "tags": ["material:sabra", "cloth" ]},
-    "00014": { "tags": ["material:sabra", "color:black", "carpet" ]}
+    "00014": { "tags": ["material:sabra", "color:black", "carpet" ]},
+    "00007": { "tags": ["material:wool", "color:red", "carpet"] },
+    "00087": { "size_cm": [138, 270], "tags": ["material:wool", "color:red"] },
+    "00091": { "size_cm": [166, 278], "tags": ["material:wool", "color:red"] },
+    "00095": { "size_cm": [180, 382], "tags": ["material:wool"] },
+    "00099": { "size_cm": [102, 145], "tags": ["material:wool"] },
+    "00100": { "size_cm": [190, 300], "tags": ["material:wool", "material:sabra" ]},
+    "00105": { "size_cm": [180, 342], "tags": ["material:wool", "material:sabra" ]},
+    "00108": { "size_cm": [142, 228], "tags": ["material:cotton", "material:wool" ]},
+    "00110": { "size_cm": [73, 126], "tags": ["material:sabra", "material:wool" ]},
+    "00111": { "size_cm": [80, 150], "tags": ["material:sabra", "material:wool" ]},
+    "00112": { "size_cm": [75, 106], "tags": ["material:sabra", "material:wool" ]},
+    "00114": { "size_cm": [78, 104], "tags": ["material:sabra", "material:wool" ]},
+    "00115": { "size_cm": [94, 148], "tags": ["material:sabra"]},
+    "00117": { "size_cm": [95, 150], "tags": ["material:sabra"]},
+    "00118": { "size_cm": [95, 148], "tags": ["material:sabra"]},
+    "00120": { "size_cm": [90, 140], "tags": ["material:sabra"]},
+    "00121": { "size_cm": [98, 142], "tags": ["material:sabra"] }
 }
